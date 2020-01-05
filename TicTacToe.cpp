@@ -22,6 +22,7 @@ int main(){
 	int inputY;
 	if(userAnswer1.compare("Y") == 0 || userAnswer1.compare("y") == 0){
 		cout << "Okay! You play first." << endl;
+		printBoard(board);
 		while(1){
 			cin >> inputX;
 			cin >> inputY;
@@ -69,7 +70,5 @@ int main(){
 			}
 		}
 	}
-	
-	
 	return 0;
 }

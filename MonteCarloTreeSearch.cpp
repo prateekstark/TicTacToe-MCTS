@@ -61,7 +61,7 @@ public:
 	}
 
 	float getUCB(){
-		float c = 1.2;
+		float c = 1.41;
 		if(this->num_visits == 0){
 			return -10.0;
 		}
@@ -97,9 +97,11 @@ public:
 class MCTS{
 public:
 	Node* rootNode;
+	int numRollouts;
 
 	MCTS(vector<vector<char> > boardState, int player){
 		rootNode = new Node(boardState, player);
+		numRollouts = 0;
 	}
 
 	vector<vector<char> > predictNextState(){
@@ -111,25 +113,28 @@ public:
 		while(time(NULL) - startTime < 1){
 			nodeToExplore = this->traverse(tempRoot);
 			playoutResult = this->rollout(nodeToExplore);
+			/*cout << playoutResult << endl;
 			if(playoutResult == this->rootNode->player){
 				result = 1;
 			}
 			if((3 - playoutResult) == this->rootNode->player){
 				result = -1;
 			}
-			// printBoard(nodeToExplore->boardState);
-			this->backpropagate(nodeToExplore, result);
+			printBoard(nodeToExplore->boardState);
+			*/
+			this->backpropagate(nodeToExplore, playoutResult);
 		}
 
-	/*	
+		/*
 		cout << "The num_visits of root are: " << tempRoot->num_visits << endl;
 
 		for(int i=0;i<tempRoot->visited_children.size();i++){
 			cout << "The num_visits are: " << tempRoot->visited_children[i]->num_visits << endl;
 			cout << "The UCB Value are: " << tempRoot->visited_children[i]->getUCB() << endl;
 		}
-	*/	
+		*/
 		int index = tempRoot->finalBestChild();
+		// cout << this->numRollouts << endl;
 		return tempRoot->visited_children[index]->boardState;
 	}
 
@@ -171,27 +176,44 @@ public:
 	}
 
 	int rollout(Node* node){
+		this->numRollouts += 1;
 		vector<vector<char> > boardState = node->boardState;
-		int player = node->player;
+		int index, player = node->player;
 	    while(getWinner(boardState) == 3){
 	    	vector<pair<int, int> > children = generateChildren(boardState);
 	    	if(children.size() == 0){
 	    		return 0;
 	    	}
-	    	int index = rand() % (children.size());
+	    	index = rand() % (children.size());
 	    	boardState = playMove(boardState, children[index].first, children[index].second, player);
 	        player = 3 - player;
 	    }
 	    return getWinner(boardState);
 	}
 
-	void backpropagate(Node* node, int result){
+
+	// void backpropagate(Node* node, int result){
+	// 	node->num_visits += 1;
+	// 	if(this->isRoot(node)){
+	// 		return;
+	// 	}
+	// 	node->updateScore(result);
+	// 	this->backpropagate(node->parent, result);
+	// }
+
+	void backpropagate(Node* node, int playoutResult){
 		node->num_visits += 1;
 		if(this->isRoot(node)){
 			return;
 		}
-		node->updateScore(result);
-		this->backpropagate(node->parent, result);
+		if(node->player == (3 - playoutResult)){
+			node->updateScore(1);	
+		}
+		else if(node->player == (playoutResult)){
+			node->updateScore(-1);
+		}
+		
+		this->backpropagate(node->parent, playoutResult);
 	}
 
 	bool isRoot(Node* node){
