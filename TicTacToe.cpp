@@ -1,7 +1,5 @@
-#include<iostream>
-#include<vector>
-#include "MonteCarloTreeSearch.cpp"
-using namespace std;
+#include<assert.h>
+#include "MonteCarloTreeSearch.h"
 
 int main(){
 	vector<vector<char> > board;
@@ -26,6 +24,7 @@ int main(){
 		while(1){
 			cin >> inputX;
 			cin >> inputY;
+			assert(board[inputX][inputY] == '-');
 			board = playMove(board, inputX, inputY, 1);
 			printBoard(board);
 			if(getWinner(board) == 1){

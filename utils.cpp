@@ -1,6 +1,4 @@
-#include<iostream>
-#include<vector>
-using namespace std;
+#include "utils.h"
 
 void printBoard(vector<vector<char> > board){
 	for(int i=0;i<3;i++){
